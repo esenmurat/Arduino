@@ -1,0 +1,83 @@
+#define ag_adi  "'TP-LINK_DDCA'";
+#define ag_sifre "'70618044'";
+
+
+void setup() {
+  pinMode(13,OUTPUT);
+Serial.begin(115200);
+Serial.println("AT");
+delay(5000);
+if(Serial.find("OK")){
+Serial.println("ESP8266 Modulü bulundu.");
+Serial.println("AT+CWMODE=1");
+Serial.println("AT+CWLAP");
+String agb1 = "AT+CWJAP=";
+agb1 += ag_adi;
+agb1 += ",";
+agb1 += ag_sifre;
+Serial.println(agb1);
+
+delay(5000);
+
+
+if(Serial.find("Error")){
+   Serial.println("Üzgünüm, wifi aðýna baðlantý saðlanamadý...");
+  
+}
+else{
+Serial.print("AT+CIPMUX=1\r\n");
+   delay(200);
+   Serial.print("AT+CIPSERVER=1,80\r\n");
+   delay(1000);
+   Serial.println("Wifi aðýna baðlantý saðlandý.");
+}
+
+
+
+
+}
+else{
+Serial.println("ESP8622 Modulü bulunamadý!");
+}
+
+}
+void loop(){
+  if(Serial.available()>0){
+    if(Serial.find("+IPD,")){
+      //Html kodlar
+      String metin = "<iframe src='http://192.168.1.106/arduino/' width='100%' height='100%' frameborder='0'></iframe>";
+      metin += "<script>window.location=\"192.168.1.106/arduino/\"</script>";  //Buton>>Button  
+      String cipsend = "AT+CIPSEND=";//Komut gönderiyoruz>>We send commands
+      cipsend +="0";
+      cipsend +=",";
+      cipsend += metin.length();
+      cipsend += "\r\n";
+      Serial.print(cipsend);
+      delay(500);
+      Serial.println(metin);
+      led_yakma_servo_dondurme();
+      
+      Serial.println("AT+CIPCLOSE=0");//Sunucuyu kapatttýk>>We closed the server
+      
+    }
+  }
+}
+
+void led_yakma_servo_dondurme(){
+ String gelen ="";
+ char serialdenokunan;
+ while(Serial.available()>0){
+ serialdenokunan = Serial.read();
+ gelen +=serialdenokunan;
+ 
+ }
+ Serial.println(gelen);
+ if((gelen.indexOf(":GET /?id=A%C3%A7")>1)){  //on butonuna basýldýðýnda ve server adresinde /?pin=on var ise>>if On button is pressed and /?pin=on exists in server
+  digitalWrite(13,HIGH);                  
+ }
+  if((gelen.indexOf(":GET /?id=Kapat")>1)){ // off butonuna basýldýðýnda server adresinde /?pin=off var ise>>if off button is pressed and /?pin=off exists in server
+  digitalWrite(13,LOW);                   
+ }
+
+ }
+ 

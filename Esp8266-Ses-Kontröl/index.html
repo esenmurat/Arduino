@@ -1,0 +1,319 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+	<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+
+	<title></title>
+</head>
+<body  style="background-color:#003333;border-radius: 15px">
+
+
+
+	<div class="container pt-5 text-white bg-dark" style="border-radius: 25px;">
+		<p class="h3 text-danger text-center">Hoş Geldiniz</p>	
+		<div class="row">
+			<!--Header bitiş-->
+
+
+
+
+			<div id="results"><span class="final" id="final_span"></span> <span class="interim" id="interim_span"></span>
+
+				<p>&nbsp;</p>
+			</div>
+
+
+
+
+
+
+		</div>
+
+
+
+
+
+
+
+<div class="row">
+
+
+			<div class="col-md-12 col-lg-12 col-12 col-sm-12 col-xl-12">
+				<p>&nbsp;</p>
+				<div id="div_language" class="form-row">
+					<select id="select_language" class="form-control" onchange="updateCountry()">
+					</select> 
+					<select id="select_dialect" class="form-control mt-2"></select>
+				</div>
+			</div>
+
+		<div id="info" class="col-md-12 col-lg-12 col-12 col-sm-12 col-xl-12">
+			<p id="info_speak_now">Şimdi Konuşun.</p>
+		</div>
+
+
+		<div class="col-md-12 col-lg-12 col-12 col-sm-12 col-xl-12">
+			<button id="start_button" class="btn btn-primary btn-block mt-2" onclick="startButton(event)">
+				<img alt="Start" id="start_img" src="http://www.aspmvcnet.com/Resim/Upload/mic.gif" />
+			</button>
+		</div>
+
+
+	
+</div>
+
+	</div>
+	<script>
+		var langs =
+		[['Afrikaans',       ['af-ZA']],
+		['Bahasa Indonesia',['id-ID']],
+		['Bahasa Melayu',   ['ms-MY']],
+		['Català',          ['ca-ES']],
+		['Ceština',         ['cs-CZ']],
+		['Deutsch',         ['de-DE']],
+		['English',         ['en-AU', 'Australia'],
+		['en-CA', 'Canada'],
+		['en-IN', 'India'],
+		['en-NZ', 'New Zealand'],
+		['en-ZA', 'South Africa'],
+		['en-GB', 'United Kingdom'],
+		['en-US', 'United States']],
+		['Español',         ['es-AR', 'Argentina'],
+		['es-BO', 'Bolivia'],
+		['es-CL', 'Chile'],
+		['es-CO', 'Colombia'],
+		['es-CR', 'Costa Rica'],
+		['es-EC', 'Ecuador'],
+		['es-SV', 'El Salvador'],
+		['es-ES', 'España'],
+		['es-US', 'Estados Unidos'],
+		['es-GT', 'Guatemala'],
+		['es-HN', 'Honduras'],
+		['es-MX', 'México'],
+		['es-NI', 'Nicaragua'],
+		['es-PA', 'Panamá'],
+		['es-PY', 'Paraguay'],
+		['es-PE', 'Perú'],
+		['es-PR', 'Puerto Rico'],
+		['es-DO', 'República Dominicana'],
+		['es-UY', 'Uruguay'],
+		['es-VE', 'Venezuela']],
+		['Euskara',         ['eu-ES']],
+		['Français',        ['fr-FR']],
+		['Galego',          ['gl-ES']],
+		['Hrvatski',        ['hr_HR']],
+		['IsiZulu',         ['zu-ZA']],
+		['Íslenska',        ['is-IS']],
+		['Italiano',        ['it-IT', 'Italia'],
+		['it-CH', 'Svizzera']],
+		['Magyar',          ['hu-HU']],
+		['Nederlands',      ['nl-NL']],
+		['Norsk bokmål',    ['nb-NO']],
+		['Polski',          ['pl-PL']],
+		['Português',       ['pt-BR', 'Brasil'],
+		['pt-PT', 'Portugal']],
+		['Româna',          ['ro-RO']],
+		['Slovencina',      ['sk-SK']],
+		['Suomi',           ['fi-FI']],
+		['Svenska',         ['sv-SE']],
+		['Türkçe',          ['tr-TR']],
+		['Lingua latina',   ['la']]];
+		for (var i = 0; i < langs.length; i++) {
+			select_language.options[i] = new Option(langs[i][0], i);
+		}
+		select_language.selectedIndex = 24;
+		updateCountry();
+		select_dialect.selectedIndex = 24;
+		showInfo('info_start');
+		function updateCountry() {
+			for (var i = select_dialect.options.length - 1; i >= 0; i--) {
+				select_dialect.remove(i);
+			}
+			var list = langs[select_language.selectedIndex];
+			for (var i = 1; i < list.length; i++) {
+				select_dialect.options.add(new Option(list[i][1], list[i][0]));
+			}
+			select_dialect.style.visibility = list[1].length == 1 ? 'hidden' : 'visible';
+		}
+		var create_email = false;
+		var final_transcript = '';
+		var recognizing = false;
+		var ignore_onend;
+		var start_timestamp;
+		if (!('webkitSpeechRecognition' in window)) {
+			upgrade();
+		} else {
+			start_button.style.display = 'inline-block';
+			var recognition = new webkitSpeechRecognition();
+			recognition.continuous = true;
+			recognition.interimResults = true;
+			recognition.onstart = function() {
+				recognizing = true;
+				showInfo('info_speak_now');
+				start_img.src = 'http://www.aspmvcnet.com/Resim/Upload/mic-animate.gif';
+			};
+			recognition.onerror = function(event) {
+				if (event.error == 'no-speech') {
+					start_img.src = 'http://www.aspmvcnet.com/Resim/Upload/mic.gif';
+					showInfo('info_no_speech');
+					ignore_onend = true;
+				}
+				if (event.error == 'audio-capture') {
+					start_img.src = 'http://www.aspmvcnet.com/Resim/Upload/mic.gif';
+					showInfo('info_no_microphone');
+					ignore_onend = true;
+				}
+				if (event.error == 'not-allowed') {
+					if (event.timeStamp - start_timestamp < 100) {
+						showInfo('info_blocked');
+					} else {
+						showInfo('info_denied');
+					}
+					ignore_onend = true;
+				}
+			};
+			recognition.onend = function() {
+				recognizing = false;
+				if (ignore_onend) {
+					return;
+				}
+				start_img.src = 'http://www.aspmvcnet.com/Resim/Upload/mic.gif';
+				if (!final_transcript) {
+					showInfo('info_start');
+					return;
+				}
+				showInfo('');
+				if (window.getSelection) {
+					window.getSelection().removeAllRanges();
+					var range = document.createRange();
+					range.selectNode(document.getElementById('final_span'));
+					window.location="http://192.168.1.107?id="+final_transcript;
+					window.getSelection().addRange(range);
+				}
+				if (create_email) {
+					create_email = false;
+					createEmail();
+				}
+			};
+			recognition.onresult = function(event) {
+				var interim_transcript = '';
+				for (var i = event.resultIndex; i < event.results.length; ++i) {
+
+					if (event.results[i].isFinal) {
+						final_transcript += event.results[i][0].transcript;
+
+					} else {
+						interim_transcript += event.results[i][0].transcript;
+					}
+				}
+				final_transcript = capitalize(final_transcript);
+				final_span.innerHTML = linebreak(final_transcript);
+				interim_span.innerHTML = linebreak(interim_transcript);
+				
+				
+
+				if (final_transcript || interim_transcript) {
+					showButtons('inline-block');
+
+				}
+
+			};
+
+		}
+
+		function upgrade() {
+
+			start_button.style.visibility = 'hidden';
+			showInfo('info_upgrade');
+		}
+		var two_line = /\n\n/g;
+		var one_line = /\n/g;
+		function linebreak(s) {
+			return s.replace(two_line, '<p></p>').replace(one_line, '<br>');
+		}
+		var first_char = /\S/;
+		function capitalize(s) {
+			return s.replace(first_char, function(m) { return m.toUpperCase(); });
+		}
+		function createEmail() {
+			var n = final_transcript.indexOf('\n');
+			if (n < 0 || n >= 80) {
+				n = 40 + final_transcript.substring(40).indexOf(' ');
+			}
+			var subject = encodeURI(final_transcript.substring(0, n));
+			var body = encodeURI(final_transcript.substring(n + 1));
+			window.location.href = 'index.html?subject=' + subject + '&body=' + body;
+
+		}
+		function copyButton() {
+			if (recognizing) {
+
+				recognizing = false;
+				recognition.stop();
+			}
+
+			copy_button.style.display = 'none';
+			copy_info.style.display = 'inline-block';
+			showInfo('');
+		}
+		function emailButton() {
+			if (recognizing) {
+				create_email = true;
+				recognizing = false;
+				recognition.stop();
+			} else {
+				createEmail();
+			}
+			email_button.style.display = 'none';
+			email_info.style.display = 'inline-block';
+			showInfo('');
+		}
+		function startButton(event) {
+			if (recognizing) {
+				recognition.stop();
+				return;
+			}
+
+			final_transcript = '';
+			recognition.lang = select_dialect.value;
+			recognition.start();
+			ignore_onend = false;
+			final_span.innerHTML = '';
+			interim_span.innerHTML = '';
+			start_img.src = 'http://www.aspmvcnet.com/Resim/Upload/mic-slash.gif';
+			showInfo('info_allow');
+			showButtons('none');
+			start_timestamp = event.timeStamp;
+		}
+		function showInfo(s) {
+			if (s) {
+				for (var child = info.firstChild; child; child = child.nextSibling) {
+					if (child.style) {
+						child.style.display = child.id == s ? 'inline' : 'none';
+					}
+				}
+				info.style.visibility = 'visible';
+			} else {
+				info.style.visibility = 'hidden';
+			}
+		}
+		var current_style;
+		function showButtons(style) {
+			if (style == current_style) {
+				return;
+			}
+			window.location="index.html?id="+interim_transcript;
+			current_style = style;
+			copy_button.style.display = style;
+			email_button.style.display = style;
+			copy_info.style.display = 'none';
+			email_info.style.display = 'none';
+		}
+	</script></div>
+	<script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js" integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1" crossorigin="anonymous"></script>
+	<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js" integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM" crossorigin="anonymous"></script>
+</body>
+</html>
