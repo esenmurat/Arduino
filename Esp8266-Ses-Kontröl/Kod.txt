@@ -1,5 +1,5 @@
-#define ag_adi  "'TP-LINK_DDCA'";
-#define ag_sifre "'70618044'";
+#define ag_adi  "'vidivid'";
+#define ag_sifre "'vidiii'";
 
 
 void setup() {
@@ -8,7 +8,7 @@ Serial.begin(115200);
 Serial.println("AT");
 delay(5000);
 if(Serial.find("OK")){
-Serial.println("ESP8266 Modulü bulundu.");
+Serial.println("ESP8266 ModulÃ¼ bulundu.");
 Serial.println("AT+CWMODE=1");
 Serial.println("AT+CWLAP");
 String agb1 = "AT+CWJAP=";
@@ -21,7 +21,7 @@ delay(5000);
 
 
 if(Serial.find("Error")){
-   Serial.println("Üzgünüm, wifi aðýna baðlantý saðlanamadý...");
+   Serial.println("ÃœzgÃ¼nÃ¼m, wifi aÃ°Ã½na baÃ°lantÃ½ saÃ°lanamadÃ½...");
   
 }
 else{
@@ -29,7 +29,7 @@ Serial.print("AT+CIPMUX=1\r\n");
    delay(200);
    Serial.print("AT+CIPSERVER=1,80\r\n");
    delay(1000);
-   Serial.println("Wifi aðýna baðlantý saðlandý.");
+   Serial.println("Wifi aÃ°Ã½na baÃ°lantÃ½ saÃ°landÃ½.");
 }
 
 
@@ -37,7 +37,7 @@ Serial.print("AT+CIPMUX=1\r\n");
 
 }
 else{
-Serial.println("ESP8622 Modulü bulunamadý!");
+Serial.println("ESP8622 ModulÃ¼ bulunamadÃ½!");
 }
 
 }
@@ -47,7 +47,7 @@ void loop(){
       //Html kodlar
       String metin = "<iframe src='http://192.168.1.106/arduino/' width='100%' height='100%' frameborder='0'></iframe>";
       metin += "<script>window.location=\"192.168.1.106/arduino/\"</script>";  //Buton>>Button  
-      String cipsend = "AT+CIPSEND=";//Komut gönderiyoruz>>We send commands
+      String cipsend = "AT+CIPSEND=";//Komut gÃ¶nderiyoruz>>We send commands
       cipsend +="0";
       cipsend +=",";
       cipsend += metin.length();
@@ -57,7 +57,7 @@ void loop(){
       Serial.println(metin);
       led_yakma_servo_dondurme();
       
-      Serial.println("AT+CIPCLOSE=0");//Sunucuyu kapatttýk>>We closed the server
+      Serial.println("AT+CIPCLOSE=0");//Sunucuyu kapatttÃ½k>>We closed the server
       
     }
   }
@@ -72,10 +72,10 @@ void led_yakma_servo_dondurme(){
  
  }
  Serial.println(gelen);
- if((gelen.indexOf(":GET /?id=A%C3%A7")>1)){  //on butonuna basýldýðýnda ve server adresinde /?pin=on var ise>>if On button is pressed and /?pin=on exists in server
+ if((gelen.indexOf(":GET /?id=A%C3%A7")>1)){  //on butonuna basÃ½ldÃ½Ã°Ã½nda ve server adresinde /?pin=on var ise>>if On button is pressed and /?pin=on exists in server
   digitalWrite(13,HIGH);                  
  }
-  if((gelen.indexOf(":GET /?id=Kapat")>1)){ // off butonuna basýldýðýnda server adresinde /?pin=off var ise>>if off button is pressed and /?pin=off exists in server
+  if((gelen.indexOf(":GET /?id=Kapat")>1)){ // off butonuna basÃ½ldÃ½Ã°Ã½nda server adresinde /?pin=off var ise>>if off button is pressed and /?pin=off exists in server
   digitalWrite(13,LOW);                   
  }
 
