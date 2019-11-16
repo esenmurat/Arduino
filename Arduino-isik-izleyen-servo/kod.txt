@@ -1,0 +1,66 @@
+#include <Servo.h>
+Servo motor;
+int ldr;
+int donder2 = 180;
+int donder = 0;
+
+void setup()
+{
+  Serial.begin(9600);
+  motor.attach(13);
+  motor.write(0);
+ 
+}
+
+void loop()
+{
+  ldr = analogRead(A0);
+  ldr = map(ldr , 6 , 679 , 0 , 5);
+  Serial.print("LDR : ");
+  Serial.print(ldr);
+  Serial.println("");
+  if(ldr < 3){
+    isiktakip();
+    
+  }
+  
+  
+  
+}
+
+
+void isiktakip()
+{
+
+
+  while(ldr < 3){
+      donder = donder + 1;
+      motor.write(donder);
+      ldr = analogRead(A0);
+      ldr = map(ldr , 6 , 679 , 0 , 5);
+      Serial.print("LDR : ");
+      Serial.print(ldr);
+      Serial.println("");
+    if(donder == 180 && ldr < 3){
+      break;
+    }
+  }
+  delay(100);
+  if(ldr < 3){
+    while(ldr < 3){
+      donder2 = donder2 - 1;
+      motor.write(donder2);
+      Serial.print("Donder 2 : ");
+      Serial.print(donder2);
+      Serial.println("");
+      ldr = analogRead(A0);
+      ldr = map(ldr , 6 , 679 , 0 , 5);
+      Serial.print("LDR : ");
+      Serial.print(ldr);
+      Serial.println("");
+    if(donder == 0 && ldr < 3){
+      break;
+    }
+  }
+  }  
+}
